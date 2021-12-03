@@ -1,5 +1,7 @@
 #!/usr/bin/env bash
 
+# Jie Chen (jc5230)
+
 . ./cmd.sh
 . ./path.sh
 
