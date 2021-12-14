@@ -51,9 +51,10 @@ def random_k_items(l, k, seed=None):
     return [l[i] for i in idx]
 
 
-def complement_list(l_full, l_given):
-    l_given_set = set(l_given)
-    return [i for i in l_full if i not in l_given_set]
+def complement_list(l_full, l_given1, l_given2):
+    l_given_set1 = set(l_given1)
+    l_given_set2 = set(l_given2)
+    return [i for i in l_full if i not in (l_given_set1 or l_given_set2)]
 
 
 def generate_group_wav_dict(batch_file):
@@ -106,11 +107,15 @@ def generate_group_wav_dict(batch_file):
 
 
 def generate_wavscp_utt2spk(batch_dict, wav_id_dict, batchname):
-    root = f'{DATA_ROOT}/{batchname}'
+    my_batchname = batchname.replace("_magicdata", "")
+    root = f'{DATA_ROOT}/{my_batchname}'
+    print("root ", root)
     if not os.path.exists(root):
         os.mkdir(root)
     wavscp_file = f'{root}/wav.scp'
     utt2spk_file = f'{root}/utt2spk'
+
+    print("wavscp_file, ", wavscp_file)
     wavscp_writer = open(wavscp_file, 'w')
     utt2spk_writer = open(utt2spk_file, 'w')
 
@@ -124,6 +129,8 @@ def generate_wavscp_utt2spk(batch_dict, wav_id_dict, batchname):
 
     wavscp_list.sort()
     utt2spk_list.sort()
+
+    print("length of wavscp", len(wavscp_list))
 
     for item in wavscp_list:
         wavscp_writer.writelines(f'{item}')
@@ -141,12 +148,14 @@ dev_dict = defaultdict()
 for group, wav_list in group_wav_dict.items():
     test_size = int(len(wav_list) * TEST_RATIO)
     test_list = random_k_items(wav_list, test_size, RANDOM_SEED)
-    train_list = complement_list(wav_list, test_list)
-    train_dict[group] = train_list
     test_dict[group] = test_list
+
     dev_size = int(len(wav_list) * DEV_RATIO)
-    dev_list = random_k_items(wav_list, dev_size, RANDOM_SEED)
+    dev_list = random_k_items(wav_list, dev_size, RANDOM_SEED+1)
     dev_dict[group] = dev_list
+
+    train_list = complement_list(wav_list, test_list, dev_list)
+    train_dict[group] = train_list
 
 generate_wavscp_utt2spk(train_dict, wav_id_dict, 'train_magicdata')
 generate_wavscp_utt2spk(test_dict, wav_id_dict, 'test_magicdata')

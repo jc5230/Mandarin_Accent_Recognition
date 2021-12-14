@@ -4,6 +4,8 @@
 # Apache 2.0
 
 # Modified by Jie Chen (jc5230)
+# Prepare transcipts
+
 
 . ./path.sh || exit 1;
 
@@ -20,38 +22,12 @@ if [ ! -d $corpus/train ] || [ ! -d $corpus/dev ] || [ ! -d $corpus/test ]; then
   echo "Error: $0 requires complete corpus"
   exit 1;
 fi
-
-echo "**** utt2spk to spk2utt ****"
-
-# find wav audio file for trian, dev, and test resp.
-mkdir -p $data/tmp
-
-temp_dir=$data/tmp
-find $corpus -iname ".wav" > $tmp_dir/wav.flist
-n=`cat $tmp_dir/wav.flist | wc -l`
-[ $n -ne 609552 ] && \
-  echo Warning: expected 609552 data data files, found $n
-
-for x in train_magicdata dev_magicdata test_magicdata; do
-  grep -i "/$x" $tmp_dir/wav.flist > $data/$x/wav.flist || exit 1;
-
-done
-
-
-
-mkdir -p $data/{train,dev,test,tmp}
-
-# find wav audio file for train, dev and test resp.
-tmp_dir=$data/tmp
-find $corpus -iname "*.wav" > $tmp_dir/wav.flist
-n=`cat $tmp_dir/wav.flist | wc -l`
-[ $n -ne 609552 ] && \
-  echo Warning: expected 609552 data data files, found $n
+  
 
 for x in train dev test; do
-  grep -i "/$x/" $tmp_dir/wav.flist > $data/$x/wav.flist || exit 1;
   echo "Filtering data using found wav list and provided transcript for $x"
-  local/magicdata_data_filter.py $data/$x/wav.flist $corpus/$x/TRANS.txt $data/$x local/magicdata_badlist
+  echo "[MODIFY: corpus/train/TRANS.txt]"
+  local/magicdata_data_filter.py $data/$x/wav.flist $corpus/train/TRANS.txt $data/$x local/magicdata_badlist
   cat $data/$x/transcripts.txt |\
     sed 's/！//g' | sed 's/？//g' |\
     sed 's/，//g' | sed 's/－//g' |\
@@ -66,8 +42,6 @@ for x in train dev test; do
   done
   utils/utt2spk_to_spk2utt.pl $data/$x/utt2spk > $data/$x/spk2utt
 done
-
-rm -r $tmp_dir
 
 utils/data/validate_data_dir.sh --no-feats $data/train || exit 1;
 utils/data/validate_data_dir.sh --no-feats $data/dev || exit 1;

@@ -1,13 +1,14 @@
 #!/usr/bin/env bash
 
 # Jie Chen (jc5230)
-# Ref: multi_cn/s5/run.sh, hkust/s5/run.sh
+# Ref: multi_cn/s5/run.sh, hkust/s5/run.sh, accent_recognition/run.sh by Lin Ai
 
 . ./cmd.sh
 . ./path.sh
 
 stage=8
 dbase=`pwd`/dataset
+data_dir=`pwd`/data
 
 magicdata_url=www.openslr.org/resources/68
 
@@ -24,10 +25,15 @@ if [ $stage -le 8 ]; then
   # local/make_metadata_folder.sh ./dataset/magicdata || exit 1;
 
   # slice and prepare data for subset
-  #autopep8 -i python_scripts/prepare_magicdata_data.py
-  #python3 python_scripts/prepare_magicdata_data.py
-
-  local/magicdata_data_prep.sh $dbase/magicdata data
+  autopep8 -i python_scripts/prepare_magicdata_data.py
+  python3 python_scripts/prepare_magicdata_data.py
+  python3 local/get_magicdata_flist.py
+  #for set_name in train dev test; do
+  #  utils/utt2spk_to_spk2utt.pl $data_dir/$set_name/utt2spk > $data_dir/$set_name/spk2utt
+  #done
+  local/magicdata_data_prep_rest.sh $dbase/magicdata $data_dir
+  # Script for preparing for whole dataset
+  #local/magicdata_data_prep.sh $dbase/magicdata data
 fi
 
 if [ $stage -le 2 ]; then
