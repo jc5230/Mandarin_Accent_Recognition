@@ -1,12 +1,25 @@
-#!/usr/bin/env bash
-sed '
-s:<NOISE>::g
-s:<SPOKEN_NOISE>::g
-s:<UNK>::g
-s/://g
-s/\*//g
-s/-HOLDER/HOLDER/g
-s/COMPAIGN/CAMPAIGN/g
-s/APPROACHES-/APPROACHES/g
-s/RESEACHERS/RESEARCHERS/g
-'
+#!/usr/bin/env perl
+# Copyright 2012-2014  Johns Hopkins University (Author: Yenda Trmal)
+# Apache 2.0
+use utf8;
+
+use open qw(:encoding(utf8));
+binmode STDIN, ":utf8";
+binmode STDOUT, ":utf8";
+binmode STDERR, ":utf8";
+
+while (<>) {
+  @F = split " ";
+  print $F[0] . " "; 
+  foreach $s (@F[1..$#F]) {
+    if (($s =~ /\[.*\]/) || ($s =~ /\<.*\>/) || ($s =~ "!SIL")) {
+      print "";
+    } else {
+      print "$s"
+    }
+    print " ";
+  }
+  print "\n";
+}
+
+

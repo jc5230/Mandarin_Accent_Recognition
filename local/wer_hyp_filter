@@ -1,13 +1,19 @@
-#!/usr/bin/env bash
-sed '
-s:<NOISE>::g
-s:<SPOKEN_NOISE>::g
-s:<UNK>::g
-s/://g
-s/\*//g
-s/-HOLDER/HOLDER/g
-s/COMPAIGN/CAMPAIGN/g
-s/APPROACHES-/APPROACHES/g
-s/RESEACHERS/RESEARCHERS/g
-'
+#!/usr/bin/env perl
 
+@filters=('<SPOKEN_NOISE>','<UNK>');
+
+foreach $w (@filters) {
+  $bad{$w} = 1;
+}
+
+while(<STDIN>) {
+  @A  = split(" ", $_);
+  $id = shift @A;
+  print "$id ";
+  foreach $a (@A) {
+    if (!defined $bad{$a}) {
+      print "$a ";
+    }
+  }
+  print "\n";
+}
