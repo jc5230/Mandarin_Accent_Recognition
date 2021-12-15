@@ -6,7 +6,7 @@
 . ./cmd.sh
 . ./path.sh
 
-stage=7
+stage=9
 dbase=`pwd`/dataset
 data_dir=`pwd`/data
 
@@ -20,9 +20,9 @@ if [ $stage -le 0 ]; then
   local/magicdata_download_and_untar.sh $dbase/magicdata $magicdata_url metadata || exit 1;
 fi
 
-if [ $stage -le 1 ]; then
+if [ $stage -le 9 ]; then
   # Reorganize magicdata metadata
-  local/make_metadata_folder.sh ./dataset/magicdata || exit 1;
+  #local/make_metadata_folder.sh ./dataset/magicdata || exit 1;
 
   # slice and prepare data for subset
   autopep8 -i python_scripts/prepare_magicdata_data.py
@@ -31,8 +31,8 @@ if [ $stage -le 1 ]; then
   local/magicdata_data_prep_rest.sh $dbase/magicdata $data_dir
 
   # Get needed wav audio
-  mkdir -p wav
-  ln -s ../train/ ./dataset/magicdata/wav/train
+  #mkdir -p wav
+  #ln -s ../train/ ./dataset/magicdata/wav/train
   
   # Script for preparing for whole dataset
   #local/magicdata_data_prep.sh $dbase/magicdata data
@@ -73,14 +73,14 @@ if [ $stage -le 5 ]; then
   utils/subset_data_dir.sh --first data/train 100000 data/train_100k || exit 1;
 fi
 
-if [ $stage -le 6 ]; then
+if [ $stage -le -1 ]; then
   echo "$0 -6: monophone training & alignment"
   steps/train_mono.sh --cmd "$train_cmd" --nj 20 \
   data/train data/lang exp/mono0a || exit 1;
 
 fi
 
-if [ $stage -le 7 ]; then
+if [ $stage -le -1 ]; then
   echo "$0 -7: monophone decoding & alignment"
   # Monophone decoding
   utils/mkgraph.sh data/lang exp/mono0a exp/mono0a/graph || exit 1
@@ -92,6 +92,17 @@ if [ $stage -le 7 ]; then
     data/train data/lang exp/mono0a exp/mono_ali || exit 1;
 fi
 
+if [ $stage -le 8 ]; then 
+  steps/train_deltas.sh --cmd "$train_cmd" \
+    2500 20000 data/train data/lang exp/mono_ali exp/tri1 || exit 1;
+  # decode tri1
+  utils/mkgraph.sh data/lang_test exp/tri1 exp/tri1/graph || exit 1;
+  steps/decode.sh --cmd "$decode_cmd" --config conf/decode.config --nj 10 \
+    exp/tri1/graph data/dev exp/tri1/decode
 
+  # align tri1
+  steps/align_si.sh --cmd "$train_cmd" --nj 10 \
+    data/train data/lang exp/tri1 exp/tri1_ali || exit 1;
+fi 
 
 exit 0;
