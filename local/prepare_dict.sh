@@ -45,22 +45,22 @@ perl $dict_dir/cmudict/scripts/make_baseform.pl \
   sed -e 's:^\([^\s(]\+\)([0-9]\+)\(\s\+\)\(.*\):\1\2\3:' > $dict_dir/cmudict/cmudict-plain.txt || exit 1;
 
 # extract in-vocab lexicon and oov words
-echo "--- Searching for English OOV words ..."
-awk 'NR==FNR{words[$1]; next;} !($1 in words)' \
-  $dict_dir/cmudict/cmudict-plain.txt $dict_dir/lexicon-en/words-en.txt |\
-  grep -E -v '<.?s>' > $dict_dir/lexicon-en/words-en-oov-all.txt || exit 1;
+#echo "--- Searching for English OOV words ..."
+#awk 'NR==FNR{words[$1]; next;} !($1 in words)' \
+#  $dict_dir/cmudict/cmudict-plain.txt $dict_dir/lexicon-en/words-en.txt |\
+#  grep -E -v '<.?s>' > $dict_dir/lexicon-en/words-en-oov-all.txt || exit 1;
 
-awk 'NR==FNR{words[$1]; next;} ($1 in words)' \
-  $dict_dir/lexicon-en/words-en.txt $dict_dir/cmudict/cmudict-plain.txt |\
-  egrep -v '<.?s>' > $dict_dir/lexicon-en/lexicon-en-iv.txt || exit 1;
+#awk 'NR==FNR{words[$1]; next;} ($1 in words)' \
+#  $dict_dir/lexicon-en/words-en.txt $dict_dir/cmudict/cmudict-plain.txt |\
+#  egrep -v '<.?s>' > $dict_dir/lexicon-en/lexicon-en-iv.txt || exit 1;
 
-rm $dict_dir/lexicon-en/words-en-oov.txt
-rm $dict_dir/lexicon-en/words-en-oov-other.txt
-lines=$(python local/extract_ch.py $dict_dir/lexicon-en/words-en-oov-all.txt)
-awk -v arr="${lines}" -v dict_dir="$dict_dir" 'BEGIN{split(arr,line_arr,","); i=1;}{if(NR==line_arr[i]){ if(i < length(line_arr)){i+=1;} print $0 >> dict_dir"/lexicon-en/words-en-oov-other.txt";} else{print $0 >> dict_dir"/lexicon-en/words-en-oov.txt";} }' $dict_dir/lexicon-en/words-en-oov-all.txt
+#rm $dict_dir/lexicon-en/words-en-oov.txt
+#rm $dict_dir/lexicon-en/words-en-oov-other.txt
+#lines=$(python local/extract_ch.py $dict_dir/lexicon-en/words-en-oov-all.txt)
+#awk -v arr="${lines}" -v dict_dir="$dict_dir" 'BEGIN{split(arr,line_arr,","); i=1;}{if(NR==line_arr[i]){ if(i < length(line_arr)){i+=1;} print $0 >> dict_dir"/lexicon-en/words-en-oov-other.txt";} else{print $0 >> dict_dir"/lexicon-en/words-en-oov.txt";} }' $dict_dir/lexicon-en/words-en-oov-all.txt
 
-wc -l $dict_dir/lexicon-en/words-en-oov.txt
-wc -l $dict_dir/lexicon-en/lexicon-en-iv.txt
+#wc -l $dict_dir/lexicon-en/words-en-oov.txt
+#wc -l $dict_dir/lexicon-en/lexicon-en-iv.txt
 
 # setup g2p and generate oov lexicon
 if [ ! -f conf/g2p_model ]; then

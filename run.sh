@@ -20,22 +20,22 @@ if [ $stage -le 0 ]; then
   local/magicdata_download_and_untar.sh $dbase/magicdata $magicdata_url metadata || exit 1;
 fi
 
-if [ $stage -le 9 ]; then
+if [ $stage -le 1 ]; then
   # Reorganize magicdata metadata
   #local/make_metadata_folder.sh ./dataset/magicdata || exit 1;
 
   # slice and prepare data for subset
-  autopep8 -i python_scripts/prepare_magicdata_data.py
-  python3 python_scripts/prepare_magicdata_data.py
-  python3 local/get_magicdata_flist.py
-  local/magicdata_data_prep_rest.sh $dbase/magicdata $data_dir
+ # autopep8 -i python_scripts/prepare_magicdata_data.py
+  #python3 python_scripts/prepare_magicdata_data.py
+  #python3 local/get_magicdata_flist.py
+  #local/magicdata_data_prep_rest.sh $dbase/magicdata $data_dir
 
   # Get needed wav audio
   #mkdir -p wav
   #ln -s ../train/ ./dataset/magicdata/wav/train
   
   # Script for preparing for whole dataset
-  #local/magicdata_data_prep.sh $dbase/magicdata data
+  local/magicdata_data_prep.sh $dbase/magicdata_small data
 fi
 
 if [ $stage -le 2 ]; then
@@ -73,14 +73,14 @@ if [ $stage -le 5 ]; then
   utils/subset_data_dir.sh --first data/train 100000 data/train_100k || exit 1;
 fi
 
-if [ $stage -le -1 ]; then
+if [ $stage -le 6 ]; then
   echo "$0 -6: monophone training & alignment"
   steps/train_mono.sh --cmd "$train_cmd" --nj 20 \
   data/train data/lang exp/mono0a || exit 1;
 
 fi
 
-if [ $stage -le -1 ]; then
+if [ $stage -le 7 ]; then
   echo "$0 -7: monophone decoding & alignment"
   # Monophone decoding
   utils/mkgraph.sh data/lang exp/mono0a exp/mono0a/graph || exit 1

@@ -7,7 +7,7 @@
 
 dbase=`pwd`/dataset
 magicdata_small=`pwd`/dataset/magicdata_small
-stage=5
+stage=8
 
 if [ $stage -le 0 ]; then
   dbase_small=$db3ase/magicdata_small
@@ -60,3 +60,31 @@ if [ $stage -le 5 ]; then
   python3 revise_train_trans.py
 fi
 
+if [ $stage -le 6 ]; then
+  for acc in 'guan' 'chuan' 'dongbei' 'wu' 'yue'; do
+    wavlist=`find ./dataset/magicdata_small/train/$acc -type f | shuf -n 200`
+    for wav in $wavlist; do
+      mv $wav ./dataset/magicdata_small/test/$acc
+    done
+     
+  done
+fi
+
+if [ $stage -le 7 ]; then
+  for acc in 'guan' 'chuan' 'dongbei' 'wu' 'yue'; do
+    wavlist=`find ./dataset/magicdata_small/train/$acc -type f | shuf -n 100`
+    for wav in $wavlist; do
+      mv $wav ./dataset/magicdata_small/dev/$acc
+    done
+
+  done
+fi
+
+if [ $stage -le 8 ]; then
+  for acc in 'guan' 'chuan' 'dongbei' 'wu' 'yue'; do
+    wavlist=`find ./dataset/magicdata_small/train/$acc -type f | shuf -n 200`
+    for wav in $wavlist; do
+      cp $wav ./dataset/magicdata_small/train_small/$acc
+    done
+  done
+fi
